@@ -1,0 +1,21 @@
+#BitPattern
+A Java class that represents a bit pattern in two's complement representation.
+
+Most of the standard bit pattern operations are supported:
+
+* Addition
+* Bitwise NOT
+* Bitwise AND
+* Bitwise OR
+* Bitwise XOR
+* Rotation
+* Arithmetic shifting
+
+The class was created to be used for byte representations so the default constructor sets the length to 8.
+It should work for bit patterns of arbitrary length if integers are replaced by instances of BigInteger (currently, if the value exceeds Integer.MAX_VALUE/MIN_VALUE it will throw an Exception).
+
+##License
+Copyright (c) 2010 Georgios Migdos.
+
+The source code is available under the terms of the [Apache license v2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
+
