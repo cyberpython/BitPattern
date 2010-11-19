@@ -27,11 +27,16 @@ public class BitPattern implements IBitPattern{
     private int max;
     private boolean[] bits;
 
+    private String hexRegex;
+    private String binaryRegex;
+
     public BitPattern() {
         this(DEFAULT_LENGTH);
     }
 
     public BitPattern(int length) {
+        this.hexRegex = "0x[0-9a-fA-F]+";
+        this.binaryRegex = "[01]+";
         this.bits = new boolean[length];
         this.numberOfBits = length;
         max = (int) Math.pow(2, numberOfBits - 1);
@@ -108,15 +113,8 @@ public class BitPattern implements IBitPattern{
         setValue(sb.toString());
     }
 
-    /**
-     * Sets this BitPattern's value using the String 'bitPattern' as the source.
-     * The 'bitPattern' parameter must have the same length as this BitPattern and
-     * consist only of the characters '0' and '1'.
-     * @param bitPattern a String representing the new value in two's complement binary representation
-     * @throws NumberFormatException if bitPattern does not have the same length with this BitPattern
-     * or contains characters other than '0' and '1'
-     */
-    public final void setValue(String bitPattern) throws NumberFormatException {
+   
+    private void setValueFromBinaryString(String bitPattern) throws NumberFormatException {
         if (bitPattern.length() != numberOfBits) {
             throw new NumberFormatException("Invalid bit pattern length : " + bitPattern.length() + " - expected: " + this.numberOfBits);
         }
@@ -131,15 +129,52 @@ public class BitPattern implements IBitPattern{
         }
     }
 
+    private void setValueFromHexString(String hexPattern) throws NumberFormatException {
+        int value = Integer.parseInt(hexPattern.substring(2),16);
+        try{
+            StringBuilder sb = new StringBuilder(Integer.toBinaryString(value));
+            while(sb.length()<this.numberOfBits){
+                sb.insert(0, '0');
+            }
+            this.setValueFromBinaryString(sb.toString());
+        }catch(NumberFormatException nfe){
+            throw nfe;
+        }
+    }
+
+
+    /**
+     * Sets this IBitPattern's value using the String 'pattern' as the source.
+     * The 'pattern' parameter can be either a two's complement hexadecimal value matched by the
+     * regular expression "0x[0-9a-fA-F]+" or a binary value in two's complement representation.
+     * The value in binary form must have the same length as this IBitPattern.
+     * @param pattern a String representing the new value in two's complement hex or binary representation
+     * @throws NumberFormatException if pattern is not in binary or hex form, or the value in binary representation
+     * does not have the same length with this IBitPattern.
+     */
+    public final void setValue(String pattern) throws NumberFormatException{
+        if(pattern.matches(binaryRegex)){
+            try{
+                this.setValueFromBinaryString(pattern);
+            }catch(NumberFormatException nfe){
+                throw nfe;
+            }
+        }else if(pattern.matches(hexRegex)){
+            setValueFromHexString(pattern);
+        }else{
+            throw new NumberFormatException("Invalid pattern : " + pattern +" - not in hexadecimal or binary form.");
+        }
+    }
+
     /**
      * Returns thisIBitPattern's value as an integer
      * @return this BitPattern's value
      */
     public int intValue() {
         if (this.get(0) == true) {
-            return Integer.parseInt(this.toString().substring(1), 2) - max;
+            return Integer.parseInt(this.toBinaryString().substring(1), 2) - max;
         } else {
-            return Integer.parseInt(this.toString(), 2);
+            return Integer.parseInt(this.toBinaryString(), 2);
         }
     }
 
@@ -149,12 +184,30 @@ public class BitPattern implements IBitPattern{
      */
     @Override
     public String toString() {
+        return this.toBinaryString();
+    }
+
+    /**
+     * Returns this BitPattern's value in binary representation as a String.
+     * @return this BitPattern's value
+     */
+    public String toBinaryString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < numberOfBits; i++) {
             sb.append(get(i) == false ? '0' : '1');
         }
         return sb.toString();
     }
+
+    /**
+     * Returns this BitPattern's value in hexadecimal representation as a String.
+     * @return this BitPattern's value
+     */
+    public String toHexString() {
+        return "0x"+Integer.toHexString(Integer.parseInt(this.toBinaryString(),2)).toUpperCase();
+    }
+
+
 
     /**
      * Rotates this BitPattern's bits to the left.
@@ -327,33 +380,4 @@ public class BitPattern implements IBitPattern{
         return result;
     }
 
-    public static void main(String[] args) {
-        BitPattern b = new BitPattern();
-        b.setValue(5);
-        System.out.println("b:   "+b);
-        System.out.println("     "+b.intValue());
-        System.out.println();
-
-        b.shiftLeft();
-        System.out.println("b:   "+b);
-        System.out.println("     "+b.intValue());
-        System.out.println();
-
-        BitPattern a = new BitPattern();
-        a.setValue(-8);
-        System.out.println("a:   "+a);
-        System.out.println("     "+a.intValue());
-        System.out.println();
-
-        IBitPattern xor = BitPattern.xor(a, b);
-        System.out.println("xor: "+xor);
-        System.out.println("     "+xor.intValue());
-        System.out.println();
-
-        xor.not();
-        System.out.println("not: "+xor);
-        System.out.println("     "+xor.intValue());
-        System.out.println();
-
-    }
 }

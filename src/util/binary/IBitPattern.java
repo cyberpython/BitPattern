@@ -52,14 +52,15 @@ public interface IBitPattern {
     public int intValue();
 
     /**
-     * Sets this IBitPattern's value using the String 'bitPattern' as the source.
-     * The 'bitPattern' parameter must have the same length as this IBitPattern and
-     * consist only of the characters '0' and '1'.
-     * @param bitPattern a String representing the new value in two's complement binary representation
-     * @throws NumberFormatException if bitPattern does not have the same length with this IBitPattern 
-     * or contains characters other than '0' and '1'
+     * Sets this IBitPattern's value using the String 'pattern' as the source.
+     * The 'pattern' parameter can be either a two's complement hexadecimal value matched by the
+     * regular expression "0x[0-9a-fA-F]+" or a binary value in two's complement representation.
+     * The value in binary form must have the same length as this IBitPattern.
+     * @param pattern a String representing the new value in two's complement hex or binary representation
+     * @throws NumberFormatException if pattern is not in binary or hex form, or the value in binary representation
+     * does not have the same length with this IBitPattern.
      */
-    public void setValue(String bitPattern);
+    public void setValue(String pattern);
 
     /**
      * Sets this IBitPattern's value using the integer 'value' as the source
@@ -126,4 +127,16 @@ public interface IBitPattern {
      * Rotates this IBitPattern's bits to the right.
      */
     public void rotateRight();
+
+    /**
+     * Returns this IBitPattern's value in binary representation as a String.
+     * @return this IBitPattern's value
+     */
+    public String toBinaryString();
+
+    /**
+     * Returns this IBitPattern's value in hexadecimal representation as a String.
+     * @return this IBitPattern's value
+     */
+    public String toHexString();
 }
